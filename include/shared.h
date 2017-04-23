@@ -1,6 +1,8 @@
 #ifndef SHARED_H
 #define SHARED_H
 
+#include <stdbool.h>
+
 typedef unsigned char      uint8;
 typedef unsigned short     uint16;
 typedef unsigned int       uint32;
@@ -43,6 +45,6 @@ typedef struct ObjectAttributes {
 #define KEY_R        0x0100
 #define KEY_L        0x0200
 
-#define MAXX 32
-#define MAXY 32
+#define MAXX 16
+#define MAXY 16
 #endif

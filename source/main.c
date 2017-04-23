@@ -62,7 +62,9 @@ int main()
     REG_BG0CNT = 0x1F83;
 //    memcpy(&MEM_TILE[0][0], dfloor, 3*bgTileLen);
     struct Map t = getMap(0,0,0);
-    memcpy(&se_mem[31], t.map, 2048);
+    unsigned short screenBlock[1024];
+    getScreenBlock(t, screenBlock);
+    memcpy(&se_mem[31], screenBlock, 2048);
 //    REG_BG0HOFS = 0;
 //    REG_BG0VOFS = 0;
 
@@ -74,7 +76,7 @@ int main()
 
     REG_DISPLAYCONTROL =  VIDEOMODE_0 | ENABLE_OBJECTS | MAPPINGMODE_1D | 0x0100;
 
-    struct Pos p = {16, 16};
+    struct Pos p = {8, 8};
     //bool updateNeeded = true;
     while(1)
     {
@@ -84,16 +86,20 @@ int main()
 
     	if (np.x != 0 || np.y != 0){
     		if (!(np.x < 0 && p.x == 0) && !(np.x > 0 && p.x == MAXX)){
-    			p.x += np.x;
+    			if (!(t.tileMap[p.y*MAXX + p.x + np.x].isWall)){
+    				p.x += np.x;
+    			}
     		}
     		if (!(np.y < 0 && p.y == 0) && !(np.y > 0 && p.y == MAXY)){
-    			p.y += np.y;
+    			if (!(t.tileMap[(p.y+np.y)*MAXX + p.x].isWall)){
+    				p.y += np.y;
+    			}
     		}
 
     		//updateNeeded = true;
     	}
-    	REG_BG0HOFS = p.x * 16;
-    	REG_BG0VOFS = p.y * 16;
+    	REG_BG0HOFS = (p.x - 7) * 16;
+    	REG_BG0VOFS = (p.y - 4) * 16;
     	//if (updateNeeded){
         	vsync();
         	spriteAttribs->attr0 = 0x2000 | (0x00FF & (4 * 16)); 
