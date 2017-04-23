@@ -3,7 +3,7 @@
 #include "shared.h"
 
 struct Map {
-	char grid[MAXX * MAXY] ;
+	const unsigned short map[2048];
 };
 
 struct Map getMap(int seed, int zone, int floor);

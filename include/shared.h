@@ -7,6 +7,7 @@ typedef unsigned int       uint32;
 
 typedef uint32 Tile[16];
 typedef Tile   TileBlock[256];
+typedef uint16 ScreenBlock[1024];
 
 #define VIDEOMODE_0    0x0000
 #define ENABLE_OBJECTS 0x1000
@@ -15,7 +16,8 @@ typedef Tile   TileBlock[256];
 #define REG_DISPLAYCONTROL      (*(volatile uint16*) 0x04000000)
 
 #define MEM_VRAM      ((volatile uint16*)0x6000000)
-#define MEM_TILE      ((TileBlock*)0x6000000 )
+#define MEM_TILE      ((TileBlock*)MEM_VRAM)
+#define se_mem        ((ScreenBlock*)MEM_VRAM)
 #define MEM_SP_PALETTE   ((uint16*)(0x05000200))
 #define MEM_BG_PALETTE   ((uint16*)(0x05000000))
 #define SCREEN_W      240
@@ -41,6 +43,6 @@ typedef struct ObjectAttributes {
 #define KEY_R        0x0100
 #define KEY_L        0x0200
 
-#define MAXX 14
-#define MAXY 9
+#define MAXX 32
+#define MAXY 32
 #endif

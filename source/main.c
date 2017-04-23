@@ -59,16 +59,23 @@ int main()
     memcpy(&MEM_TILE[0][1], wallU, bgTileLen);
     memcpy(&MEM_TILE[0][2], wallB, bgTileLen);
 
+    REG_BG0CNT = 0x1F83;
+//    memcpy(&MEM_TILE[0][0], dfloor, 3*bgTileLen);
+    struct Map t = getMap(0,0,0);
+    memcpy(&se_mem[31], t.map, 2048);
+//    REG_BG0HOFS = 0;
+//    REG_BG0VOFS = 0;
+
     volatile ObjectAttributes *spriteAttribs = &MEM_OAM[0];
 
     spriteAttribs->attr0 = 0x2032; // 8bpp tiles, SQUARE shape, at y coord 50
     spriteAttribs->attr1 = 0x4064; // 16x16 size when using the SQUARE shape
     spriteAttribs->attr2 = 2;      // Start at the first tile in tile
 
-    REG_DISPLAYCONTROL =  VIDEOMODE_0 | ENABLE_OBJECTS | MAPPINGMODE_1D;
+    REG_DISPLAYCONTROL =  VIDEOMODE_0 | ENABLE_OBJECTS | MAPPINGMODE_1D | 0x0100;
 
-    struct Pos p = {0, 0};
-    bool updateNeeded = true;
+    struct Pos p = {16, 16};
+    //bool updateNeeded = true;
     while(1)
     {
     	scanKeys();
@@ -83,14 +90,16 @@ int main()
     			p.y += np.y;
     		}
 
-    		updateNeeded = true;
+    		//updateNeeded = true;
     	}
-    	if (updateNeeded){
+    	REG_BG0HOFS = p.x * 16;
+    	REG_BG0VOFS = p.y * 16;
+    	//if (updateNeeded){
         	vsync();
         	spriteAttribs->attr0 = 0x2000 | (0x00FF & (4 * 16)); 
         	spriteAttribs->attr1 = 0x4000 | (0x1FF & (7 * 16));
-        	updateNeeded = false;
-        }
+        	//updateNeeded = false;
+        //}
 
     }
     return 0;
