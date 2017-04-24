@@ -52,21 +52,23 @@ struct Pos updatePlayerPos( uint16 keys){
 
 int main()
 {
+	// Upload the object and background palettes.
     memcpy(MEM_SP_PALETTE, spritePal,  spritePalLen );
 	memcpy(MEM_BG_PALETTE, bgPal,  bgPalLen );
+	// Upload sprite tiles to the first sprite page (page 5)
     memcpy(&MEM_TILE[4][1], spriteTiles, spriteTilesLen);
-    memcpy(&MEM_TILE[0][0], dfloor, bgTileLen);
-    memcpy(&MEM_TILE[0][1], wallU, bgTileLen);
-    memcpy(&MEM_TILE[0][2], wallB, bgTileLen);
 
+    // Upload bg tiles to the first page
+    memcpy(&MEM_TILE[0][0], dfloor, bgTileLen);
+    //memcpy(&MEM_TILE[0][4], wallU, bgTileLen);
+    //memcpy(&MEM_TILE[0][8], wallB, bgTileLen);
+
+    // Set up the bg0 control address
     REG_BG0CNT = 0x1F83;
-//    memcpy(&MEM_TILE[0][0], dfloor, 3*bgTileLen);
     struct Map t = getMap(0,0,0);
     unsigned short screenBlock[1024];
     getScreenBlock(t, screenBlock);
     memcpy(&se_mem[31], screenBlock, 2048);
-//    REG_BG0HOFS = 0;
-//    REG_BG0VOFS = 0;
 
     volatile ObjectAttributes *spriteAttribs = &MEM_OAM[0];
 
