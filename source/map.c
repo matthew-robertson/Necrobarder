@@ -1,8 +1,8 @@
 #include "map.h"
 
-struct Block fb = {0x0000, false, 0};
-struct Block w1b = {0x0004, true, 1};
-struct Block w2b = {0x0008, true, 2};
+struct Block fb = {0x0000, false, false, 0};
+struct Block w1b = {0x0004, true, true, 1};
+struct Block w2b = {0x0008, true, true, 2};
 
 struct Map getMap(int seed, int zone, int floor){
 	struct Map m;

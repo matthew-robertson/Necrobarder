@@ -45,7 +45,9 @@ struct Pos updatePlayerPos( uint16 keys){
     return diff;
 }
 
+// Updates the world based on the player's input for the turn.
 void playerTurn(struct Pos np){
+	// We want to deal with every combination of inputs	
 	if (np.x == 1 && np.y == 1){
 
 	} else if (np.x == 1 && np.y == -1){
@@ -55,9 +57,13 @@ void playerTurn(struct Pos np){
 	} else if (np.x == -1 && np.y == -1){
 
 	} else {
+		// For x-axis motion and y-axis motion, ensure we aren't trying to go out of bounds
+		// then ensure we can actually move into the tile (it isn't occupied or a wall)
 		if (!(np.x < 0 && p.pos.x == 0) && !(np.x > 0 && p.pos.x == MAXX)){
-			if (!(t.tileMap[p.pos.y*MAXX + p.pos.x + np.x].isWall)){
+			if (!(t.tileMap[p.pos.y*MAXX + p.pos.x + np.x].isWall) && !(t.tileMap[p.pos.y*MAXX + p.pos.x + np.x].isOccupied)){
+				t.tileMap[p.pos.y*MAXX + p.pos.x].isOccupied = false;
 				p.pos.x += np.x;
+				t.tileMap[p.pos.y*MAXX + p.pos.x].isOccupied = true;
 			} else {
 				unsigned short bhealth = t.tileMap[p.pos.y*MAXX + p.pos.x + np.x].health;
 				if (p.digStrength >= bhealth){
@@ -67,8 +73,10 @@ void playerTurn(struct Pos np){
 			}
 		}
 		if (!(np.y < 0 && p.pos.y == 0) && !(np.y > 0 && p.pos.y == MAXY)){
-			if (!(t.tileMap[(p.pos.y+np.y)*MAXX + p.pos.x].isWall)){
+			if (!(t.tileMap[(p.pos.y+np.y)*MAXX + p.pos.x].isWall) && !(t.tileMap[(p.pos.y+np.y)*MAXX + p.pos.x].isOccupied)){
+				t.tileMap[p.pos.y*MAXX + p.pos.x].isOccupied = false;
 				p.pos.y += np.y;
+				t.tileMap[p.pos.y*MAXX + p.pos.x].isOccupied = true;
 			} else {
 				unsigned short bhealth = t.tileMap[(p.pos.y+np.y)*MAXX + p.pos.x].health;
 				if (p.digStrength >= bhealth){

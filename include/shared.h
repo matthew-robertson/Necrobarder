@@ -56,6 +56,7 @@ struct Pos{
 struct Block {
 	unsigned short id;
 	bool isWall;
+	bool isOccupied;
 	unsigned short health;
 
 };
