@@ -2,13 +2,6 @@
 #define MAP_H
 #include "shared.h"
 
-struct Block {
-	unsigned short id;
-	bool isWall;
-	unsigned short health;
-
-};
-
 struct Map {
 	struct Block tileMap[256];
 };

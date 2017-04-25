@@ -9,26 +9,21 @@
 #include <string.h>
 
 #include "shared.h"
+#include "entity.h"
 #include "map.h"
 #include "mapTiles.h"
 #include "testSprite.h"
+
+struct Map t;
+struct Entity p = {{8,8}, 3, 1};
+bool playerMoved = false;
+bool tileChanged = false;
 
 inline void vsync()
 {
     while (REG_VCOUNT >= 160);
     while (REG_VCOUNT < 160);
 }
-
-
-struct Pos{
-	int x;
-	int y;
-};
-
-struct actor{
-	struct Pos pos;
-	int health;
-};
 
 struct Pos updatePlayerPos( uint16 keys){
 	struct Pos diff = {0,0};
@@ -50,6 +45,41 @@ struct Pos updatePlayerPos( uint16 keys){
     return diff;
 }
 
+void playerTurn(struct Pos np){
+	if (np.x == 1 && np.y == 1){
+
+	} else if (np.x == 1 && np.y == -1){
+
+	} else if (np.x == -1 && np.y == 1){
+
+	} else if (np.x == -1 && np.y == -1){
+
+	} else {
+		if (!(np.x < 0 && p.pos.x == 0) && !(np.x > 0 && p.pos.x == MAXX)){
+			if (!(t.tileMap[p.pos.y*MAXX + p.pos.x + np.x].isWall)){
+				p.pos.x += np.x;
+			} else {
+				unsigned short bhealth = t.tileMap[p.pos.y*MAXX + p.pos.x + np.x].health;
+				if (p.digStrength >= bhealth){
+					t.tileMap[p.pos.y*MAXX + p.pos.x + np.x] = fb;
+					tileChanged = true;
+				}
+			}
+		}
+		if (!(np.y < 0 && p.pos.y == 0) && !(np.y > 0 && p.pos.y == MAXY)){
+			if (!(t.tileMap[(p.pos.y+np.y)*MAXX + p.pos.x].isWall)){
+				p.pos.y += np.y;
+			} else {
+				unsigned short bhealth = t.tileMap[(p.pos.y+np.y)*MAXX + p.pos.x].health;
+				if (p.digStrength >= bhealth){
+					t.tileMap[(p.pos.y+np.y)*MAXX + p.pos.x] = fb;
+					tileChanged = true;
+				}
+			}
+		}
+	}
+}
+
 int main()
 {
 	// Upload the object and background palettes.
@@ -60,12 +90,12 @@ int main()
 
     // Upload bg tiles to the first page
     memcpy(&MEM_TILE[0][0], dfloor, bgTileLen);
-    //memcpy(&MEM_TILE[0][4], wallU, bgTileLen);
-    //memcpy(&MEM_TILE[0][8], wallB, bgTileLen);
+    memcpy(&MEM_TILE[0][4], wallU, bgTileLen);
+    memcpy(&MEM_TILE[0][8], wallB, bgTileLen);
 
     // Set up the bg0 control address
     REG_BG0CNT = 0x1F83;
-    struct Map t = getMap(0,0,0);
+    t = getMap(0,0,0);
     unsigned short screenBlock[1024];
     getScreenBlock(t, screenBlock);
     memcpy(&se_mem[31], screenBlock, 2048);
@@ -78,8 +108,6 @@ int main()
 
     REG_DISPLAYCONTROL =  VIDEOMODE_0 | ENABLE_OBJECTS | MAPPINGMODE_1D | 0x0100;
 
-    struct Pos p = {8, 8};
-    //bool updateNeeded = true;
     while(1)
     {
     	scanKeys();
@@ -87,21 +115,22 @@ int main()
     	struct Pos np = updatePlayerPos(keys);
 
     	if (np.x != 0 || np.y != 0){
-    		if (!(np.x < 0 && p.x == 0) && !(np.x > 0 && p.x == MAXX)){
-    			if (!(t.tileMap[p.y*MAXX + p.x + np.x].isWall)){
-    				p.x += np.x;
-    			}
-    		}
-    		if (!(np.y < 0 && p.y == 0) && !(np.y > 0 && p.y == MAXY)){
-    			if (!(t.tileMap[(p.y+np.y)*MAXX + p.x].isWall)){
-    				p.y += np.y;
-    			}
-    		}
-
+    		playerMoved = true;
+    		playerTurn(np);
     		//updateNeeded = true;
     	}
-    	REG_BG0HOFS = (p.x - 7) * 16;
-    	REG_BG0VOFS = (p.y - 4) * 16;
+    	REG_BG0HOFS = (p.pos.x - 7) * 16;
+    	REG_BG0VOFS = (p.pos.y - 4) * 16;
+
+    	if (playerMoved){
+    		playerMoved = false;
+    	}
+
+    	if (tileChanged){
+    		getScreenBlock(t, screenBlock);
+    		memcpy(&se_mem[31], screenBlock, 2048);
+    		tileChanged = false;
+    	}
     	//if (updateNeeded){
         	vsync();
         	spriteAttribs->attr0 = 0x2000 | (0x00FF & (4 * 16)); 

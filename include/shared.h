@@ -47,4 +47,21 @@ typedef struct ObjectAttributes {
 
 #define MAXX 16
 #define MAXY 16
+
+struct Pos{
+	int x;
+	int y;
+};
+
+struct Block {
+	unsigned short id;
+	bool isWall;
+	unsigned short health;
+
+};
+
+extern struct Block fb;
+extern struct Block w1b;
+extern struct Block w2b;
+
 #endif
