@@ -12,7 +12,7 @@
 #include "entity.h"
 #include "map.h"
 #include "mapTiles.h"
-#include "testSprite.h"
+#include "sprites.h"
 
 struct Map t;
 struct Entity p = {{8,8}, 3, 1};
@@ -23,6 +23,42 @@ inline void vsync()
 {
     while (REG_VCOUNT >= 160);
     while (REG_VCOUNT < 160);
+}
+
+volatile ObjectAttributes * healthAttribs [5];
+void initUI(){
+	// Set up Health
+	for (int i = 0; i < 5; i++){
+		healthAttribs[i] = &MEM_OAM[i+1];
+		healthAttribs[i]->attr0 = 0x2002; // 8bpp tiles, SQUARE shape, at y coord 50
+		unsigned short xCoord = 16 * i;
+    	healthAttribs[i]->attr1 = 0x4000 + xCoord; // 16x16 size when using the SQUARE shape
+    	if (i <= p.health){
+    		healthAttribs[i]->attr2 = 0xA;      // What tile to start at. 2 means [4][1]
+    	} else {
+    		healthAttribs[i]->attr2 = 0x12;
+    	}
+	}
+}
+
+void updatePlayerHealth(unsigned short diff){
+	if (-diff >= p.health){
+		p.health = 0;
+	} else{
+		p.health += diff;
+	}
+
+	for (int i = 0; i < 5; i++){
+		healthAttribs[i] = &MEM_OAM[i+1];
+		healthAttribs[i]->attr0 = 0x2002; // 8bpp tiles, SQUARE shape, at y coord 50
+		unsigned short xCoord = 16 * i;
+    	healthAttribs[i]->attr1 = 0x4000 + xCoord; // 16x16 size when using the SQUARE shape
+    	if (i <= p.health){
+    		healthAttribs[i]->attr2 = 0xA;      // What tile to start at. 2 means [4][1]
+    	} else {
+    		healthAttribs[i]->attr2 = 0x12;
+    	}
+	}
 }
 
 struct Pos updatePlayerPos( uint16 keys){
@@ -49,13 +85,13 @@ struct Pos updatePlayerPos( uint16 keys){
 void playerTurn(struct Pos np){
 	// We want to deal with every combination of inputs	
 	if (np.x == 1 && np.y == 1){
-
+		updatePlayerHealth(-1);
 	} else if (np.x == 1 && np.y == -1){
 
 	} else if (np.x == -1 && np.y == 1){
 
 	} else if (np.x == -1 && np.y == -1){
-
+		updatePlayerHealth(1);
 	} else {
 		// For x-axis motion and y-axis motion, ensure we aren't trying to go out of bounds
 		// then ensure we can actually move into the tile (it isn't occupied or a wall)
@@ -94,25 +130,29 @@ int main()
     memcpy(MEM_SP_PALETTE, spritePal,  spritePalLen );
 	memcpy(MEM_BG_PALETTE, bgPal,  bgPalLen );
 	// Upload sprite tiles to the first sprite page (page 5)
-    memcpy(&MEM_TILE[4][1], spriteTiles, spriteTilesLen);
+    memcpy(&MEM_TILE[4][1], bard, spriteTilesLen);
+    memcpy(&MEM_TILE[4][5], fullHeart, spriteTilesLen);
+    memcpy(&MEM_TILE[4][9], emptyHeart, spriteTilesLen);
 
     // Upload bg tiles to the first page
     memcpy(&MEM_TILE[0][0], dfloor, bgTileLen);
     memcpy(&MEM_TILE[0][4], wallU, bgTileLen);
     memcpy(&MEM_TILE[0][8], wallB, bgTileLen);
 
-    // Set up the bg0 control address
+    // Set up the bg0 control address and initialize the map
     REG_BG0CNT = 0x1F83;
     t = getMap(0,0,0);
     unsigned short screenBlock[1024];
     getScreenBlock(t, screenBlock);
     memcpy(&se_mem[31], screenBlock, 2048);
 
+    initUI();
+
     volatile ObjectAttributes *spriteAttribs = &MEM_OAM[0];
 
     spriteAttribs->attr0 = 0x2032; // 8bpp tiles, SQUARE shape, at y coord 50
     spriteAttribs->attr1 = 0x4064; // 16x16 size when using the SQUARE shape
-    spriteAttribs->attr2 = 2;      // Start at the first tile in tile
+    spriteAttribs->attr2 = 2;      // What tile to start at. 2 means [4][1]
 
     REG_DISPLAYCONTROL =  VIDEOMODE_0 | ENABLE_OBJECTS | MAPPINGMODE_1D | 0x0100;
 

@@ -1,4 +1,4 @@
-#include "testSprite.h"
+#include "mapTiles.h"
 const unsigned int wallB[64] __attribute__((aligned(4)))=
 {
     0x04040404,0x04040404,0x04040404,0x04040404,0x04040404,0x04040404,0x04040404,0x04040404,
@@ -35,7 +35,7 @@ const unsigned int dfloor[64] __attribute__((aligned(4)))=
     0x02020303,0x02030302,0x03040403,0x01010103,0x01010302,0x01030101,0x01020301,0x00010101,
 };
 
-const unsigned int bgPal[3] __attribute__((aligned(4)))=
+const unsigned int bgPal[4] __attribute__((aligned(4)))=
 {
     0x14AA0000,0x08640000,0x0000150E
 };
