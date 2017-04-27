@@ -15,7 +15,7 @@
 #include "sprites.h"
 
 struct Map t;
-struct Entity p = {{8,8}, 3, 1};
+struct Entity p = {{8,8}, 1, 8, 1};
 bool playerMoved = false;
 bool tileChanged = false;
 
@@ -25,39 +25,45 @@ inline void vsync()
     while (REG_VCOUNT < 160);
 }
 
-volatile ObjectAttributes * healthAttribs [5];
+volatile ObjectAttributes * healthAttribs [MAXHEARTS];
+
+void drawHealth(){
+	for (int i = 0; i < MAXHEARTS; i++){
+		if ((i+1) * 2 <= p.health){
+    		healthAttribs[i]->attr2 = 0x10;      // What tile to start at. 2 means [4][1]
+    	} else if ((i+1)*2 == p.health + 1){
+    		healthAttribs[i]->attr2 = 0x18;
+    	} else {
+    		healthAttribs[i]->attr2 = 0x20;
+    	}
+
+    	// If a heart isn't unlocked, give it a blank texture
+    	if ((i+1) * 2 > p.maxHealth){
+    		healthAttribs[i]->attr2 = 0x0;
+    	}
+	}
+}
+
 void initUI(){
 	// Set up Health
-	for (int i = 0; i < 5; i++){
+	for (int i = 0; i < MAXHEARTS; i++){
 		healthAttribs[i] = &MEM_OAM[i+1];
-		healthAttribs[i]->attr0 = 0x2002; // 8bpp tiles, SQUARE shape, at y coord 50
-		unsigned short xCoord = 16 * i;
-    	healthAttribs[i]->attr1 = 0x4000 + xCoord; // 16x16 size when using the SQUARE shape
-    	if (i <= p.health){
-    		healthAttribs[i]->attr2 = 0xA;      // What tile to start at. 2 means [4][1]
-    	} else {
-    		healthAttribs[i]->attr2 = 0x12;
-    	}
+		unsigned short yCoord = 2;
+		healthAttribs[i]->attr0 = 0x2000 + yCoord; // 8bpp tiles, SQUARE shape, at y coord 50
+		
+    	healthAttribs[i]->attr1 = 0x4000 + 0x12 * i; // 16x16 size when using the SQUARE shape
 	}
 }
 
 void updatePlayerHealth(unsigned short diff){
 	if (-diff >= p.health){
 		p.health = 0;
+		// Do death stuff here
 	} else{
 		p.health += diff;
-	}
-
-	for (int i = 0; i < 5; i++){
-		healthAttribs[i] = &MEM_OAM[i+1];
-		healthAttribs[i]->attr0 = 0x2002; // 8bpp tiles, SQUARE shape, at y coord 50
-		unsigned short xCoord = 16 * i;
-    	healthAttribs[i]->attr1 = 0x4000 + xCoord; // 16x16 size when using the SQUARE shape
-    	if (i <= p.health){
-    		healthAttribs[i]->attr2 = 0xA;      // What tile to start at. 2 means [4][1]
-    	} else {
-    		healthAttribs[i]->attr2 = 0x12;
-    	}
+		if (p.health >= p.maxHealth){
+			p.health = p.maxHealth;
+		}
 	}
 }
 
@@ -85,6 +91,7 @@ struct Pos updatePlayerPos( uint16 keys){
 void playerTurn(struct Pos np){
 	// We want to deal with every combination of inputs	
 	if (np.x == 1 && np.y == 1){
+		p.maxHealth -= 2;
 		updatePlayerHealth(-1);
 	} else if (np.x == 1 && np.y == -1){
 
@@ -92,6 +99,7 @@ void playerTurn(struct Pos np){
 
 	} else if (np.x == -1 && np.y == -1){
 		updatePlayerHealth(1);
+		p.maxHealth += 2;
 	} else {
 		// For x-axis motion and y-axis motion, ensure we aren't trying to go out of bounds
 		// then ensure we can actually move into the tile (it isn't occupied or a wall)
@@ -130,9 +138,12 @@ int main()
     memcpy(MEM_SP_PALETTE, spritePal,  spritePalLen );
 	memcpy(MEM_BG_PALETTE, bgPal,  bgPalLen );
 	// Upload sprite tiles to the first sprite page (page 5)
-    memcpy(&MEM_TILE[4][1], bard, spriteTilesLen);
-    memcpy(&MEM_TILE[4][5], fullHeart, spriteTilesLen);
-    memcpy(&MEM_TILE[4][9], emptyHeart, spriteTilesLen);
+
+	// We leave a blank sprite at [4][0] 
+    memcpy(&MEM_TILE[4][4], bard, spriteTilesLen);
+    memcpy(&MEM_TILE[4][8], fullHeart, spriteTilesLen);
+    memcpy(&MEM_TILE[4][12], halfHeart, spriteTilesLen);
+    memcpy(&MEM_TILE[4][16], emptyHeart, spriteTilesLen);
 
     // Upload bg tiles to the first page
     memcpy(&MEM_TILE[0][0], dfloor, bgTileLen);
@@ -147,12 +158,13 @@ int main()
     memcpy(&se_mem[31], screenBlock, 2048);
 
     initUI();
+    drawHealth();
 
     volatile ObjectAttributes *spriteAttribs = &MEM_OAM[0];
 
     spriteAttribs->attr0 = 0x2032; // 8bpp tiles, SQUARE shape, at y coord 50
     spriteAttribs->attr1 = 0x4064; // 16x16 size when using the SQUARE shape
-    spriteAttribs->attr2 = 2;      // What tile to start at. 2 means [4][1]
+    spriteAttribs->attr2 = 0x8;      // What tile to start at. 2 means [4][1]
 
     REG_DISPLAYCONTROL =  VIDEOMODE_0 | ENABLE_OBJECTS | MAPPINGMODE_1D | 0x0100;
 
@@ -181,6 +193,7 @@ int main()
     	}
     	//if (updateNeeded){
         	vsync();
+        	drawHealth();
         	spriteAttribs->attr0 = 0x2000 | (0x00FF & (4 * 16)); 
         	spriteAttribs->attr1 = 0x4000 | (0x1FF & (7 * 16));
         	//updateNeeded = false;
