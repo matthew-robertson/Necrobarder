@@ -1,3 +1,6 @@
+
+#ifndef ENTITY_H
+#define ENTITY_H
 #include "shared.h"
 
 struct Entity{
@@ -5,4 +8,7 @@ struct Entity{
 	unsigned short health;
 	unsigned short maxHealth;
 	unsigned short digStrength;
+	unsigned short sprite;
+	unsigned short movementPattern;
 };
+#endif

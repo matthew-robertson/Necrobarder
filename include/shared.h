@@ -2,6 +2,7 @@
 #define SHARED_H
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 typedef unsigned char      uint8;
 typedef unsigned short     uint16;
@@ -48,6 +49,7 @@ typedef struct ObjectAttributes {
 #define MAXX 16
 #define MAXY 16
 #define MAXHEARTS 5
+#define MAXENEMIES 20
 
 struct Pos{
 	int x;

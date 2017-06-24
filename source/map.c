@@ -4,7 +4,9 @@ struct Block fb = {0x0000, false, false, 0};
 struct Block w1b = {0x0004, true, true, 1};
 struct Block w2b = {0x0008, true, true, 2};
 
-struct Map getMap(int seed, int zone, int floor){
+struct Entity slime = {{0,0}, 1, 8, 1, 1, 1};
+
+struct Map getMap(int seed, int zone, int floor, struct Entity e[MAXENEMIES]){
 	struct Map m;
 
     for (int i = 0; i < MAXY; i++){
@@ -20,6 +22,21 @@ struct Map getMap(int seed, int zone, int floor){
     				m.tileMap[index] = fb;
     			}
     	}
+    }
+
+    for (int i = 0; i < MAXENEMIES; i++){
+    	int nx = rand() % MAXX;
+    	int ny = rand() % MAXY;
+    	int index = ny*16+nx;
+    	while (m.tileMap[index].isWall != false || m.tileMap[index].isWall != false ){
+    		nx = rand() % MAXX;
+    		ny = rand() % MAXY;
+    	}
+
+    	m.tileMap[index].isOccupied = true;
+    	e[i] = slime;
+    	e[i].pos.x = nx;
+    	e[i].pos.x = ny;
     }
 
 	return m;

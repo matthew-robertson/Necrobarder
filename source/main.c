@@ -15,7 +15,8 @@
 #include "sprites.h"
 
 struct Map t;
-struct Entity p = {{8,8}, 1, 8, 1};
+struct Entity p = {{8,8}, 1, 8, 1, 0, 0};
+struct Entity enemies[MAXENEMIES];
 bool playerMoved = false;
 bool tileChanged = false;
 
@@ -152,7 +153,8 @@ int main()
 
     // Set up the bg0 control address and initialize the map
     REG_BG0CNT = 0x1F83;
-    t = getMap(0,0,0);
+    srand(0);
+    t = getMap(0,0,0, enemies);
     unsigned short screenBlock[1024];
     getScreenBlock(t, screenBlock);
     memcpy(&se_mem[31], screenBlock, 2048);
