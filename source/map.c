@@ -24,7 +24,7 @@ struct Map getMap(int seed, int zone, int floor, struct Entity e[MAXENEMIES]){
     	}
     }
 
-    for (int i = 0; i < MAXENEMIES; i++){
+    /*for (int i = 0; i < MAXENEMIES; i++){
     	int nx = rand() % MAXX;
     	int ny = rand() % MAXY;
     	int index = ny*16+nx;
@@ -37,7 +37,7 @@ struct Map getMap(int seed, int zone, int floor, struct Entity e[MAXENEMIES]){
     	e[i] = slime;
     	e[i].pos.x = nx;
     	e[i].pos.x = ny;
-    }
+    }*/
 
 	return m;
 }

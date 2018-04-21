@@ -153,7 +153,6 @@ int main()
 
     // Set up the bg0 control address and initialize the map
     REG_BG0CNT = 0x1F83;
-    srand(0);
     t = getMap(0,0,0, enemies);
     unsigned short screenBlock[1024];
     getScreenBlock(t, screenBlock);
