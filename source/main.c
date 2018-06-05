@@ -16,7 +16,7 @@
 
 struct Map t;
 struct Entity p = {{8,8}, 1, 8, 1, 0, 0};
-struct Entity enemies[MAXENEMIES];
+struct Entity *enemies[MAXENEMIES];
 bool playerMoved = false;
 bool tileChanged = false;
 
@@ -45,6 +45,27 @@ void drawHealth(){
 	}
 }
 
+void drawEnemies(){
+    for (int i = 0; i < MAXENEMIES; i++){
+    	struct Entity *e = enemies[i];
+    	e->spriteAttribs->attr0 = 0x2000 | (0x00ff & ((4 + e->pos.y - p.pos.y) * 16));
+    	e->spriteAttribs->attr1 = 0x4000 | (0x1FF & ((7 + e->pos.x - p.pos.x) * 16));
+    	e->spriteAttribs->attr2 = 0x8;
+    }
+}
+
+void initEnemies(){
+	// Set up Enemies
+	for (int i = 0; i < MAXENEMIES; i++){
+		enemies[i] = malloc(sizeof(struct Entity));
+		enemies[i]->pos.x = 7;
+		enemies[i]->pos.y = 7;
+		enemies[i]->spriteAttribs = &MEM_OAM[i+MAXHEARTS+1];
+		enemies[i]->spriteAttribs->attr0 = 0x2000 | (0x00FF & (-1 * 16)); 
+        enemies[i]->spriteAttribs->attr1 = 0x4000 | (0x1FF & (-1 * 16));
+	}
+}
+
 void initUI(){
 	// Set up Health
 	for (int i = 0; i < MAXHEARTS; i++){
@@ -54,6 +75,7 @@ void initUI(){
 		
     	healthAttribs[i]->attr1 = 0x4000 + 0x12 * i; // 16x16 size when using the SQUARE shape
 	}
+
 }
 
 void updatePlayerHealth(unsigned short diff){
@@ -153,12 +175,13 @@ int main()
 
     // Set up the bg0 control address and initialize the map
     REG_BG0CNT = 0x1F83;
-    t = getMap(0,0,0, enemies);
+    t = getMap(0,0,0, *enemies);
     unsigned short screenBlock[1024];
     getScreenBlock(t, screenBlock);
     memcpy(&se_mem[31], screenBlock, 2048);
 
     initUI();
+    initEnemies();
     drawHealth();
 
     volatile ObjectAttributes *spriteAttribs = &MEM_OAM[0];
@@ -166,6 +189,8 @@ int main()
     spriteAttribs->attr0 = 0x2032; // 8bpp tiles, SQUARE shape, at y coord 50
     spriteAttribs->attr1 = 0x4064; // 16x16 size when using the SQUARE shape
     spriteAttribs->attr2 = 0x8;      // What tile to start at. 2 means [4][1]
+
+    p.spriteAttribs = spriteAttribs;
 
     REG_DISPLAYCONTROL =  VIDEOMODE_0 | ENABLE_OBJECTS | MAPPINGMODE_1D | 0x0100;
 
@@ -195,6 +220,7 @@ int main()
     	//if (updateNeeded){
         	vsync();
         	drawHealth();
+        	drawEnemies();
         	spriteAttribs->attr0 = 0x2000 | (0x00FF & (4 * 16)); 
         	spriteAttribs->attr1 = 0x4000 | (0x1FF & (7 * 16));
         	//updateNeeded = false;

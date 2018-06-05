@@ -49,7 +49,7 @@ typedef struct ObjectAttributes {
 #define MAXX 16
 #define MAXY 16
 #define MAXHEARTS 5
-#define MAXENEMIES 20
+#define MAXENEMIES 16
 
 struct Pos{
 	int x;
