@@ -58,8 +58,6 @@ void initEnemies(){
 	// Set up Enemies
 	for (int i = 0; i < MAXENEMIES; i++){
 		enemies[i] = malloc(sizeof(struct Entity));
-		enemies[i]->pos.x = 7;
-		enemies[i]->pos.y = 7;
 		enemies[i]->spriteAttribs = &MEM_OAM[i+MAXHEARTS+1];
 		enemies[i]->spriteAttribs->attr0 = 0x2000 | (0x00FF & (-1 * 16)); 
         enemies[i]->spriteAttribs->attr1 = 0x4000 | (0x1FF & (-1 * 16));
@@ -131,7 +129,7 @@ void playerTurn(struct Pos np){
 				t.tileMap[p.pos.y*MAXX + p.pos.x].isOccupied = false;
 				p.pos.x += np.x;
 				t.tileMap[p.pos.y*MAXX + p.pos.x].isOccupied = true;
-			} else {
+			} else if (t.tileMap[p.pos.y*MAXX + p.pos.x + np.x].isWall){
 				unsigned short bhealth = t.tileMap[p.pos.y*MAXX + p.pos.x + np.x].health;
 				if (p.digStrength >= bhealth){
 					t.tileMap[p.pos.y*MAXX + p.pos.x + np.x] = fb;
@@ -144,7 +142,7 @@ void playerTurn(struct Pos np){
 				t.tileMap[p.pos.y*MAXX + p.pos.x].isOccupied = false;
 				p.pos.y += np.y;
 				t.tileMap[p.pos.y*MAXX + p.pos.x].isOccupied = true;
-			} else {
+			} else if (t.tileMap[(p.pos.y+np.y)*MAXX + p.pos.x].isWall) {
 				unsigned short bhealth = t.tileMap[(p.pos.y+np.y)*MAXX + p.pos.x].health;
 				if (p.digStrength >= bhealth){
 					t.tileMap[(p.pos.y+np.y)*MAXX + p.pos.x] = fb;
@@ -175,13 +173,13 @@ int main()
 
     // Set up the bg0 control address and initialize the map
     REG_BG0CNT = 0x1F83;
-    t = getMap(0,0,0, *enemies);
+    initEnemies();
+    t = getMap(0,0,0, enemies);
     unsigned short screenBlock[1024];
     getScreenBlock(t, screenBlock);
     memcpy(&se_mem[31], screenBlock, 2048);
 
     initUI();
-    initEnemies();
     drawHealth();
 
     volatile ObjectAttributes *spriteAttribs = &MEM_OAM[0];

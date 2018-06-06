@@ -10,6 +10,7 @@ struct Entity{
 	unsigned short digStrength;
 	unsigned short sprite;
 	unsigned short movementPattern;
+	unsigned short movementStep;
 	volatile ObjectAttributes *spriteAttribs;
 };
 #endif
