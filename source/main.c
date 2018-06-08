@@ -15,7 +15,7 @@
 #include "sprites.h"
 
 struct Map t;
-struct Entity p = {{8,8}, 1, 8, 1, 0, 0};
+struct Entity p = {{9,9}, 1, 8, 1, 0, 0};
 struct Entity *enemies[MAXENEMIES];
 bool playerMoved = false;
 bool tileChanged = false;
@@ -176,7 +176,7 @@ int main()
     initEnemies();
     t = getMap(0,0,0, enemies);
     unsigned short screenBlock[1024];
-    getScreenBlock(t, screenBlock);
+    getScreenBlock(t, screenBlock, p.pos);
     memcpy(&se_mem[31], screenBlock, 2048);
 
     initUI();
@@ -203,16 +203,18 @@ int main()
     		playerTurn(np);
     		//updateNeeded = true;
     	}
-    	REG_BG0HOFS = (p.pos.x - 7) * 16;
-    	REG_BG0VOFS = (p.pos.y - 4) * 16;
+    	//REG_BG0HOFS = (p.pos.x - 7) * 16;
+    	//REG_BG0VOFS = (p.pos.y - 4) * 16;
 
     	if (playerMoved){
+    		getScreenBlock(t, screenBlock, p.pos);
+			memcpy(&se_mem[31], screenBlock, 2048);
     		playerMoved = false;
     	}
 
     	if (tileChanged){
-    		getScreenBlock(t, screenBlock);
-    		memcpy(&se_mem[31], screenBlock, 2048);
+			getScreenBlock(t, screenBlock, p.pos);
+			memcpy(&se_mem[31], screenBlock, 2048);
     		tileChanged = false;
     	}
     	//if (updateNeeded){

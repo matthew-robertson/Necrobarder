@@ -46,8 +46,10 @@ typedef struct ObjectAttributes {
 #define KEY_R        0x0100
 #define KEY_L        0x0200
 
-#define MAXX 16
-#define MAXY 16
+#define MAXX 32
+#define MAXY 32
+#define SCREENMAXX 16
+#define SCREENMAXY 16
 #define MAXHEARTS 5
 #define MAXENEMIES 16
 

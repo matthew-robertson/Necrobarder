@@ -11,8 +11,8 @@ struct Map getMap(int seed, int zone, int floor, struct Entity *e[MAXENEMIES]){
 
     for (int i = 0; i < MAXY; i++){
     	for (int j = 0; j < MAXX; j++){
-    			int index = i*16 + j;
-    			if (i <= 3 || i >= MAXY-3 || j <= 3 || j >= MAXX - 3){
+    			int index = i*MAXX + j;
+    			if (i <= 4 || i >= MAXY-4 || j <= 7 || j >= MAXX - 7){
     				if (index % 3 == 0){
     					m.tileMap[index] = w2b;
     				} else{
@@ -27,7 +27,7 @@ struct Map getMap(int seed, int zone, int floor, struct Entity *e[MAXENEMIES]){
     for (int i = 0; i < MAXENEMIES; i++){
     	int nx = 9;//rand() % MAXX;
     	int ny = 9;//rand() % MAXY;
-    	int index = ny*16+nx;
+    	int index = ny*MAXX+nx;
     	/*while (m.tileMap[index].isWall != false || m.tileMap[index].isWall != false ){
     		nx = rand() % MAXX;
     		ny = rand() % MAXY;
@@ -42,17 +42,17 @@ struct Map getMap(int seed, int zone, int floor, struct Entity *e[MAXENEMIES]){
 	return m;
 }
 
-void getScreenBlock(struct Map m, unsigned short *screenArray){
-	for (int i = 0; i < MAXY; i++){
-		for (int j = 0; j < MAXX; j++){
+void getScreenBlock(struct Map m, unsigned short *screenArray, struct Pos playerPos){
+	for (int i = 0; i < SCREENMAXY; i++){
+		for (int j = 0; j < SCREENMAXX; j++){
 			int ind1 = i*64 + j*2;
 			int ind2 = ind1 + 1;
 			int ind3 = ind1 + 32;
 			int ind4 = ind2 + 32;
-			screenArray[ind1] = m.tileMap[i*16 + j].id;
-			screenArray[ind2] = m.tileMap[i*16 + j].id+1;
-			screenArray[ind3] = m.tileMap[i*16 + j].id+2;
-			screenArray[ind4] = m.tileMap[i*16 + j].id+3;
+			screenArray[ind1] = m.tileMap[(i + playerPos.y - 4)*MAXX + (j + playerPos.x - 7)].id;
+			screenArray[ind2] = m.tileMap[(i + playerPos.y - 4)*MAXX + (j + playerPos.x - 7)].id+1;
+			screenArray[ind3] = m.tileMap[(i + playerPos.y - 4)*MAXX + (j + playerPos.x - 7)].id+2;
+			screenArray[ind4] = m.tileMap[(i + playerPos.y - 4)*MAXX + (j + playerPos.x - 7)].id+3;
 		}
 	}
 }
