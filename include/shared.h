@@ -59,10 +59,10 @@ struct Pos{
 };
 
 struct Block {
-	unsigned short id;
+	char id;
 	bool isWall;
 	bool isOccupied;
-	unsigned short health;
+	char health;
 
 };
 
